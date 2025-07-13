@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chatbot Ins€CtyS</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f5f5f5;
+    }
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #ffffff;
+    }
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #ccc;
+      padding: 10px;
+      background: #fafafa;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .chat-input button {
+      margin-left: 8px;
+      padding: 10px 14px;
+      background-color: #4a7c59;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .bubble {
+      max-width: 80%;
+      margin-bottom: 8px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      line-height: 1.4;
+    }
+    .user { align-self: flex-end; background: #d4edda; }
+    .bot { align-self: flex-start; background: #eee; }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-box" id="chatBox"></div>
+    <div class="chat-input">
+      <input type="text" id="userInput" placeholder="Écrivez ici..." />
+      <button onclick="sendMessage()">Envoyer</button>
+    </div>
+  </div>
+
+  <script>
+    const apiKey = "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";
+    const chatBox = document.getElementById("chatBox");
+
+    function appendMessage(sender, text) {
+      const bubble = document.createElement("div");
+      bubble.className = `bubble ${sender}`;
+      bubble.innerText = text;
+      chatBox.appendChild(bubble);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value.trim();
+      if (!message) return;
+
+      appendMessage("user", message);
+      input.value = "...";
+
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            { role: "system", content: "Tu es un assistant d'élevage d'insectes, expert, patient et motivant. Réponds clairement." },
+            { role: "user", content: message }
+          ],
+        }),
+      });
+
+      const data = await res.json();
+      const reply = data.choices?.[0]?.message?.content || "🤖 Erreur...";
+      appendMessage("bot", reply);
+      input.value = "";
+    }
+  </script>
+</body>
+</html>
